@@ -1,0 +1,6 @@
+.idea/
+.vscode/
+.DS_Store
+.realize.yaml
+/vendor/
+conf.ini
