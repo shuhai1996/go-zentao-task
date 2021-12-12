@@ -1,8 +1,8 @@
 package admin
 
 import (
-	"go-zentao-task/core"
 	"github.com/gin-gonic/gin"
+	"go-zentao-task/core"
 )
 
 type RoleMenu struct {

@@ -1,10 +1,11 @@
-//+build wireinject
+//go:build wireinject
+// +build wireinject
 
 package example
 
 import (
-	"go-zentao-task/model/example"
 	"github.com/google/wire"
+	"go-zentao-task/model/example"
 )
 
 type ServiceExample struct {

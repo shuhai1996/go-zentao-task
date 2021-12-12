@@ -1,9 +1,9 @@
 package admin
 
 import (
+	"github.com/gin-gonic/gin"
 	"go-zentao-task/core"
 	"go-zentao-task/pkg/rbac"
-	"github.com/gin-gonic/gin"
 )
 
 type Menu struct {
