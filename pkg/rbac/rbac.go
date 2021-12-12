@@ -1,9 +1,9 @@
 package rbac
 
 import (
-	"go-zentao-task/pkg/db"
 	"github.com/casbin/casbin/v2"
 	gormadapter "github.com/casbin/gorm-adapter/v2"
+	"go-zentao-task/pkg/db"
 	"log"
 )
 

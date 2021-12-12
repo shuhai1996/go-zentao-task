@@ -1,10 +1,11 @@
-//+build wireinject
+//go:build wireinject
+// +build wireinject
 
 package admin
 
 import (
-	"go-zentao-task/model/admin"
 	"github.com/google/wire"
+	"go-zentao-task/model/admin"
 )
 
 type Service struct {

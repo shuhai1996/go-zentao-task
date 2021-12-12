@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"bytes"
+	"github.com/gin-gonic/gin"
 	"go-zentao-task/core"
 	"go-zentao-task/pkg/logging"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 )
 

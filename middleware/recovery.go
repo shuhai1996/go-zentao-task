@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"go-zentao-task/pkg/logging"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"go-zentao-task/pkg/logging"
 	"net/http"
 )
 

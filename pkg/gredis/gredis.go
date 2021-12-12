@@ -1,9 +1,9 @@
 package gredis
 
 import (
-	"go-zentao-task/pkg/config"
 	"errors"
 	"github.com/gomodule/redigo/redis"
+	"go-zentao-task/pkg/config"
 	"log"
 	"time"
 )

@@ -2,9 +2,9 @@ package docs
 
 import (
 	"crypto/md5"
-	"go-zentao-task/pkg/config"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"go-zentao-task/pkg/config"
 	"io/ioutil"
 	"net/http"
 	"os"
