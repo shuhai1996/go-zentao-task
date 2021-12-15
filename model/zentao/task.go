@@ -46,7 +46,7 @@ func (*Task) FindAll(assignedTo, status string) ([]Task, error) {
 		odb = odb.Where("status = 'doing' or status = 'wait'")
 	}
 
-	if err := odb.Order("status").Order("id desc").Find(&result).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := odb.Order("status desc").Order("id desc").Find(&result).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 	return result, nil

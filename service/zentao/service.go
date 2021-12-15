@@ -65,3 +65,7 @@ func (service *Service) GetEstimateToday() (float32, error) {
 	fmt.Println("今日工时填写", consumed)
 	return consumed, err
 }
+
+func (Service *Service) UpdateTask() {
+	//todo
+}
