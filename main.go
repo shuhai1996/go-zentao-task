@@ -33,8 +33,7 @@ func main() {
 	setup(env)//初始化配置
 	es,_ := service.GetEstimateToday()// 已用工时
 	url := util.GetRobotUrl()
-	no := notificat
-	ion.NewNotification()// 创建报警实体
+	no := notification.NewNotification()// 创建报警实体
 	no.SendNotification(url, service.User.Account, strconv.FormatFloat(float64(es), 'f', 10, 32))// 发送报警，工时转成字符串
 	//监听终端quit命令
 	quit := make(chan os.Signal, 1)
