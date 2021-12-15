@@ -7,14 +7,17 @@ import (
 
 type Task struct {
 	ID       int    `json:"id"`
-	Project  string `json:"project"`
-	Parent   string `json:"parent"`
-	Module   string `json:"module"`
+	Project  int `json:"project"`
+	Parent   int `json:"parent"`
+	Module   int `json:"module"`
 	Status   string `json:"status"`
 	Type     string `json:"type"`
 	Name     string `json:"name"`
 	Estimate string `json:"estimate"`
-	Left     string `json:"left"`
+	Left     float32 `json:"left"`
+	Execution int `json:"execution"`
+	AssignedTo string `json:"assignedTo"`
+	FromBug int `json:"fromBug"`
 	Deleted  int    `json:"deleted"`
 }
 
@@ -46,7 +49,7 @@ func (*Task) FindAll(assignedTo, status string) ([]Task, error) {
 		odb = odb.Where("status = 'doing' or status = 'wait'")
 	}
 
-	if err := odb.Order("status").Order("id desc").Find(&result).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := odb.Order("status desc").Order("id desc").Find(&result).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 	return result, nil
