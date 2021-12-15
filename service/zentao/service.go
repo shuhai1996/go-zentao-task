@@ -10,16 +10,20 @@ func InitializeService() *Service {
 	task := zentao.NewTask()
 	user := zentao.NewUser()
 	estimate := zentao.NewTaskEstimate()
-	service := NewService(task, user, estimate)
+	projectProduct := zentao.NewProjectProduct()
+	action := zentao.NewAction()
+	service := NewService(task, user, estimate, projectProduct, action)
 	return service
 }
 
 func NewService(
-	task *zentao.Task, user *zentao.User, estimate *zentao.TaskEstimate) *Service {
+	task *zentao.Task, user *zentao.User, estimate *zentao.TaskEstimate, projectProduct *zentao.ProjectProduct, action *zentao.Action) *Service {
 	return &Service{
 		Task:     task,
 		User:     user,
 		Estimate: estimate,
+		ProjectProduct: projectProduct,
+		Action: action,
 	}
 }
 
@@ -27,6 +31,8 @@ type Service struct {
 	Task     *zentao.Task
 	User     *zentao.User
 	Estimate *zentao.TaskEstimate
+	ProjectProduct *zentao.ProjectProduct
+	Action *zentao.Action
 }
 
 func (service *Service) TaskView(id int) string {
@@ -66,6 +72,26 @@ func (service *Service) GetEstimateToday() (float32, error) {
 	return consumed, err
 }
 
-func (Service *Service) UpdateTask() {
-	//todo
+func (service *Service) UpdateTask(task int, estimate float32, action string) float32{
+	taskInfo,err :=  service.Task.FindOne(task)
+	if err !=nil {
+		fmt.Println("获取任务异常")
+		return 0
+	}
+	productInfo, _:= service.ProjectProduct.FindOneByProject(taskInfo.Project)
+	if action== "finished" {
+		if taskInfo.FromBug !=0 {
+			fmt.Println("任务从bug创建，不能直接完成")
+			return 0
+		}
+		estimate = taskInfo.Left
+	}
+	if estimate > taskInfo.Left {
+		fmt.Println("消耗工时不能大于剩余工时")
+		return 0
+	}
+	//创建操作记录
+	service.Action.Create(task,"task", ","+string(productInfo.Product)+",", taskInfo.Project, taskInfo.Execution, taskInfo.AssignedTo, action)
+
+	return estimate
 }

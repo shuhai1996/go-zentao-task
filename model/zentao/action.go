@@ -14,7 +14,12 @@ type Action struct {
 	Execution   int `json:"execution"`
 	Actor     string `json:"actor"`
 	Action     string `json:"action"`
+	Extra float32 `json:"extra"`
 	Date time.Time `json:"date"`
+}
+
+func NewAction() *Action {
+	return &Action{}
 }
 
 func (*Action) Create(objectID int, objectType string, product string, project int, execution int, actor string, action string) (int, error) {
