@@ -11,7 +11,7 @@ type TaskEstimate struct {
 	Task     string  `json:"task"`
 	Date     string  `json:"date"`
 	Left     string  `json:"left"`
-	Consumed float32 `json:"consumed"`
+	Consumed float64 `json:"consumed"`
 	Account  string  `json:"account"`
 	Work     string  `json:"work"`
 }
