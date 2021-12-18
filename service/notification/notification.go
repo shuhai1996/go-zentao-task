@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go-zentao-task/pkg/util"
 	"io/ioutil"
 	"net/http"
 )
@@ -26,12 +27,14 @@ func NewNotification() *Notification {
 }
 
 // SendNotification 发送机器人报警
-func (notification *Notification) SendNotification(url string, name string, estimate string) []byte {
+func (notification *Notification) SendNotification(name string, estimate string, count string, ids []int) []byte {
+	url := util.GetRobotUrl()
+	idSt, err := json.Marshal(ids)
 	// 构造POST请求
 	postBody := &PostBody{
 		Msgtype: "markdown",
 		Markdown: Marks{
-			Content: "禅道<font color=\"warning\">工时</font>，请相关同事注意。\n>昵称<font color=\"comment\">" + name + "</font>\n>用时:<font color=\"comment\">" + estimate + "</font>\n>",
+			Content: "禅道<font color=\"warning\">工时</font>，请相关同事注意。\n>昵称<font color=\"comment\">" + name + "</font>\n>手动填写用时:<font color=\"comment\">" + estimate + "</font>\n>自动填写用时:<font color=\"comment\">" + count + "</font>\n>任务id:<font color=\"comment\">" + string(idSt) + "</font>",
 		},
 	}
 	// struct 转json
