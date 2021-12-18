@@ -7,6 +7,7 @@ import (
 	"go-zentao-task/pkg/logging"
 	"go-zentao-task/pkg/util"
 	"go-zentao-task/pkg/zentaouser"
+	"go-zentao-task/service/notification"
 	"go-zentao-task/service/zentao"
 	"log"
 	"os"
@@ -70,11 +71,11 @@ func main() {
 		service.User.Account = u
 		service.UserLogin()
 		time.Sleep(time.Duration(2) * time.Second)  //休眠2s
-		//es, _ := service.GetEstimateToday()         // 已用工时
-		//count, ids := service.ConsumeRecord(8 - es) //记录工时
-		//fmt.Println(count, ids)
-		//no := notification.NewNotification()                                                                // 创建报警实体
-		//no.SendNotification(service.User.Account, fmt.Sprintf("%.2f", es), fmt.Sprintf("%.2f", count), ids) // 发送报警，工时转成字符串
+		es, _ := service.GetEstimateToday()         // 已用工时
+		count, ids := service.ConsumeRecord(8 - es) //记录工时
+		fmt.Println(count, ids)
+		no := notification.NewNotification()                                                                // 创建报警实体
+		no.SendNotification(service.User.Account, fmt.Sprintf("%.2f", es), fmt.Sprintf("%.2f", count), ids) // 发送报警，工时转成字符串
 	}
 	//监听终端quit命令
 	quit := make(chan os.Signal, 1)
