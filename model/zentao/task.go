@@ -22,7 +22,7 @@ type Task struct {
 	FromBug        int       `json:"fromBug" gorm:"column:fromBug"`
 	FinishedBy     string    `json:"finishedBy" gorm:"column:finishedBy"`
 	FinishedDate   time.Time `json:"finishedDate" gorm:"column:finishedDate"`
-	LastEditedDate string    `json:"lastEditedDate" gorm:"column:lastEditedDate"`
+	LastEditedDate time.Time `json:"lastEditedDate" gorm:"column:lastEditedDate"`
 	Deleted        int       `json:"deleted"`
 }
 
@@ -50,27 +50,30 @@ func (*Task) FindOne(id int) (*Task, error) {
 	return &result, nil
 }
 
-func (*Task) FindAll(assignedTo, status string) ([]Task, error) {
+func (*Task) FindAll(assignedTo, status string, left float64, leftSort string) ([]Task, error) {
 	var result []Task
 	odb := db.Orm.Where("assignedTo = ?", assignedTo)
 
 	if status != "" {
-		odb = odb.Where("status = ?", "status")
+		odb = odb.Where("status = ?", status)
 	} else {
 		odb = odb.Where("status = 'doing' or status = 'wait'")
 	}
+	if left > 0 {
+		odb = odb.Where("`left` > ? ", 0)
+	}
 
-	if err := odb.Order("status desc").Order("id desc").Find(&result).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := odb.Order("status desc").Order("`left` " + leftSort).Order("id desc").Find(&result).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 	return result, nil
 }
 
-func (*Task) UpdateOne(task int, estimate float64, left float64, finished string, finishDate time.Time) (int64, error) {
+func (*Task) UpdateOne(task int, estimate float64, left float64, actor string, finishDate time.Time) (int64, error) {
 	op := db.Orm.Model(&Task{}).Where(&Task{ID: task}).Updates(map[string]interface{}{
 		"consumed":       estimate,
 		"left":           left,
-		"finishedBy":     finished,
+		"finishedBy":     actor,
 		"finishedDate":   finishDate,
 		"lastEditedDate": time.Now(),
 	})

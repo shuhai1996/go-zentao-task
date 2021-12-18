@@ -51,8 +51,9 @@ func (service *Service) TaskView(id int) string {
 	return t.Name
 }
 
+// GetAllTaskNotDone 获取未完成任务
 func (service *Service) GetAllTaskNotDone() []zentao.Task {
-	tasks, err := service.Task.FindAll(service.User.Account, "")
+	tasks, err := service.Task.FindAll(service.User.Account, "", 1, "asc")
 	if err != nil {
 		fmt.Println("获取任务异常")
 		return nil
@@ -60,6 +61,7 @@ func (service *Service) GetAllTaskNotDone() []zentao.Task {
 	return tasks
 }
 
+// GetEstimateToday 获取今日工时
 func (service *Service) GetEstimateToday() (float64, error) {
 	estimate, err := service.Estimate.GetToday(service.User.Account)
 	if err != nil {
@@ -70,35 +72,43 @@ func (service *Service) GetEstimateToday() (float64, error) {
 	for _, v := range estimate {
 		consumed += v.Consumed
 	}
-	fmt.Println("今日工时填写", consumed)
+	fmt.Println("今日工时填写", fmt.Sprintf("%.2f", consumed))
 	return consumed, err
 }
 
 func (service *Service) UpdateTask(task int, estimate float64, action string) float64 {
 	taskInfo, err := service.Task.FindOne(task)
+	var name = ""
 	if err != nil {
 		fmt.Println("获取任务异常")
 		return 0
 	}
 	productInfo, _ := service.ProjectProduct.FindOneByProject(taskInfo.Project)
-	if action == "finished" {
+
+	if taskInfo.Status == zentao.StatusWait {
+		action = zentao.ActionStart
+	}
+
+	if estimate == taskInfo.Left || estimate > taskInfo.Left { //消耗工时不能大于剩余工时
+		estimate = taskInfo.Left
+		action = zentao.StatusFinished
+	}
+	if action == zentao.StatusFinished {
 		if taskInfo.FromBug != 0 {
 			fmt.Println("任务从bug创建，不能直接完成")
 			return 0
 		}
 		estimate = taskInfo.Left
 		taskInfo.FinishedDate = time.Now()
+		name = taskInfo.AssignedTo
 	}
-	if estimate > taskInfo.Left {
-		fmt.Println("消耗工时不能大于剩余工时")
-		return 0
-	}
+
 	//创建操作记录
-	service.Action.Create(task, "task", ","+strconv.Itoa(productInfo.Product)+",", taskInfo.Project, taskInfo.Execution, taskInfo.AssignedTo, action, estimate)
+	service.Action.Create(task, "task", ","+strconv.Itoa(productInfo.Product)+",", taskInfo.Project, taskInfo.Execution, taskInfo.AssignedTo, action, strconv.FormatFloat(estimate, 'f', -1, 64))
 	//创建工时填写记录
 	service.Estimate.Create(task, taskInfo.Left, estimate, taskInfo.AssignedTo, "")
 
-	service.Task.UpdateOne(task, estimate+taskInfo.Consumed, taskInfo.Left-estimate, taskInfo.AssignedTo, taskInfo.FinishedDate)
+	service.Task.UpdateOne(task, estimate+taskInfo.Consumed, taskInfo.Left-estimate, name, taskInfo.FinishedDate)
 	return estimate
 }
 
@@ -142,16 +152,32 @@ func (service *Service) OptimumTask(tasks []zentao.Task, result []int, round int
 }
 
 // ConsumeRecord 记录工时
-func (service *Service) ConsumeRecord() float64 {
-	estimate := 0.5
+func (service *Service) ConsumeRecord(estimate float64) (float64, []int) {
 	var current float64
+	var ids []int
+	if estimate <= 0 {
+		fmt.Println("今日工时已完成，不需要填写")
+		return 0, nil
+	}
 	tasks := service.GetOptimumTasks()
 	for _, task := range tasks {
-		current += service.UpdateTask(task, estimate, "recordestimate")
-		if current >= 1 {
+		current += service.UpdateTask(task, estimate-current, zentao.ActionRecorde)
+		ids = append(ids, task)
+		if current >= 8 {
 			break
 		}
 	}
 	current, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", current), 64)
-	return current
+	return current, ids
+}
+
+func (service *Service) UserLogin() {
+	action,_ := service.Action.FindLastLogin(service.User.Account)
+	// 当前时间往前推三个小时
+	add,_ := time.ParseDuration("-3h")
+	last := time.Now().Add(add)
+	if last.Sub(action.Date).Seconds() >0 { //记录时间在三小时前
+		//创建操作记录
+		service.Action.Create(service.User.ID, "user", ","+strconv.Itoa(0)+",", 0, 0, service.User.Account, zentao.ActionLogin, "")
+	}
 }

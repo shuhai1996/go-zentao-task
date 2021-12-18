@@ -5,3 +5,4 @@
 /vendor/
 conf.ini
 go-zentao-task
+*.csv
