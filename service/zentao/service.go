@@ -80,7 +80,7 @@ func (service *Service) UpdateTask(task int, estimate float64, action string) fl
 		fmt.Println("获取任务异常")
 		return 0
 	}
-	//productInfo, _:= service.ProjectProduct.FindOneByProject(taskInfo.Project)
+	productInfo, _ := service.ProjectProduct.FindOneByProject(taskInfo.Project)
 	if action == "finished" {
 		if taskInfo.FromBug != 0 {
 			fmt.Println("任务从bug创建，不能直接完成")
@@ -94,7 +94,9 @@ func (service *Service) UpdateTask(task int, estimate float64, action string) fl
 		return 0
 	}
 	//创建操作记录
-	//service.Action.Create(task,"task", ","+ strconv.Itoa(productInfo.Product)+",", taskInfo.Project, taskInfo.Execution, taskInfo.AssignedTo, action, estimate)
+	service.Action.Create(task, "task", ","+strconv.Itoa(productInfo.Product)+",", taskInfo.Project, taskInfo.Execution, taskInfo.AssignedTo, action, estimate)
+	//创建工时填写记录
+	service.Estimate.Create(task, taskInfo.Left, estimate, taskInfo.AssignedTo, "")
 
 	service.Task.UpdateOne(task, estimate+taskInfo.Consumed, taskInfo.Left-estimate, taskInfo.AssignedTo, taskInfo.FinishedDate)
 	return estimate

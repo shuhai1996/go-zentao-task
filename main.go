@@ -5,7 +5,9 @@ import (
 	"go-zentao-task/pkg/config"
 	"go-zentao-task/pkg/db"
 	"go-zentao-task/pkg/logging"
+	"go-zentao-task/pkg/util"
 	"go-zentao-task/pkg/zentaouser"
+	"go-zentao-task/service/notification"
 	"go-zentao-task/service/zentao"
 	"log"
 	"os"
@@ -28,14 +30,12 @@ func setup(env string) {
 
 func main() {
 	var env = "development"
-	setup(env) //初始化配置
-	//es,_ := service.GetEstimateToday()// 已用工时
-	//es := service.GetAllTaskNotDone()
-	es := service.ConsumeRecord()
-	fmt.Println(es)
-	//url := util.GetRobotUrl()
-	//no := notification.NewNotification()// 创建报警实体
-	//no.SendNotification(url, service.User.Account, strconv.FormatFloat(float64(es), 'f', 10, 32))// 发送报警，工时转成字符串
+	setup(env)                          //初始化配置
+	service.ConsumeRecord()             //记录工时
+	es, _ := service.GetEstimateToday() // 已用工时
+	url := util.GetRobotUrl()
+	no := notification.NewNotification()                                    // 创建报警实体
+	no.SendNotification(url, service.User.Account, fmt.Sprintf("%.2f", es)) // 发送报警，工时转成字符串
 	//监听终端quit命令
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
