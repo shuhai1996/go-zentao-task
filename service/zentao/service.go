@@ -105,11 +105,16 @@ func (service *Service) UpdateTask(task int, estimate float64, action string) fl
 		name = taskInfo.AssignedTo
 	}
 
+	if estimate <= 0 {
+		fmt.Println("耗时不能为0")
+		return 0
+	}
+
 	//创建操作记录
 	service.Action.Create(task, "task", ","+strconv.Itoa(productInfo.Product)+",", taskInfo.Project, taskInfo.Execution, taskInfo.AssignedTo, action, strconv.FormatFloat(estimate, 'f', -1, 64))
 	//创建工时填写记录
 	service.Estimate.Create(task, taskInfo.Left, estimate, taskInfo.AssignedTo, "")
-
+	//更新任务
 	service.Task.UpdateOne(task, estimate+taskInfo.Consumed, taskInfo.Left-estimate, name, taskInfo.FinishedDate, taskInfo.Status)
 	return estimate
 }
