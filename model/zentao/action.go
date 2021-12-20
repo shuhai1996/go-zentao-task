@@ -15,7 +15,7 @@ type Action struct {
 	Execution  int       `json:"execution"`
 	Actor      string    `json:"actor"`
 	Action     string    `json:"action"`
-	Extra      string   `json:"extra"`
+	Extra      string    `json:"extra"`
 	Date       time.Time `json:"date"`
 }
 
@@ -53,11 +53,10 @@ func (*Action) Create(objectID int, objectType string, product string, project i
 func (*Action) FindLastLogin(actor string) (*Action, error) {
 	var result Action
 	if err := db.Orm.Where(&Action{
-		Actor: actor,
+		Actor:  actor,
 		Action: ActionLogin,
 	}).Order("id desc").First(&result).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 	return &result, nil
 }
-

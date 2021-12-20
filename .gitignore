@@ -6,3 +6,6 @@
 conf.ini
 go-zentao-task
 *.csv
+*.sql
+*_test.go
+main

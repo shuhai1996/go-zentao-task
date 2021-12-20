@@ -69,13 +69,14 @@ func (*Task) FindAll(assignedTo, status string, left float64, leftSort string) (
 	return result, nil
 }
 
-func (*Task) UpdateOne(task int, estimate float64, left float64, actor string, finishDate time.Time) (int64, error) {
+func (*Task) UpdateOne(task int, estimate float64, left float64, actor string, finishDate time.Time, status string) (int64, error) {
 	op := db.Orm.Model(&Task{}).Where(&Task{ID: task}).Updates(map[string]interface{}{
 		"consumed":       estimate,
 		"left":           left,
 		"finishedBy":     actor,
 		"finishedDate":   finishDate,
 		"lastEditedDate": time.Now(),
+		"status":         status,
 	})
 	if op.Error != nil {
 		return 0, op.Error
