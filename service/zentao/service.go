@@ -85,13 +85,15 @@ func (service *Service) UpdateTask(task int, estimate float64, action string) fl
 	}
 	productInfo, _ := service.ProjectProduct.FindOneByProject(taskInfo.Project)
 
-	if taskInfo.Status == zentao.StatusWait {
+	if taskInfo.Status == zentao.StatusWait { // 等待状态改为开始
 		action = zentao.ActionStart
+		taskInfo.Status = zentao.StatusDo
 	}
 
 	if estimate == taskInfo.Left || estimate > taskInfo.Left { //消耗工时不能大于剩余工时
 		estimate = taskInfo.Left
 		action = zentao.StatusFinished
+		taskInfo.Status = zentao.StatusFinished
 	}
 	if action == zentao.StatusFinished {
 		if taskInfo.FromBug != 0 {
@@ -108,7 +110,7 @@ func (service *Service) UpdateTask(task int, estimate float64, action string) fl
 	//创建工时填写记录
 	service.Estimate.Create(task, taskInfo.Left, estimate, taskInfo.AssignedTo, "")
 
-	service.Task.UpdateOne(task, estimate+taskInfo.Consumed, taskInfo.Left-estimate, name, taskInfo.FinishedDate)
+	service.Task.UpdateOne(task, estimate+taskInfo.Consumed, taskInfo.Left-estimate, name, taskInfo.FinishedDate, taskInfo.Status)
 	return estimate
 }
 
@@ -160,11 +162,17 @@ func (service *Service) ConsumeRecord(estimate float64) (float64, []int) {
 		return 0, nil
 	}
 	tasks := service.GetOptimumTasks()
+OuterLoop: // 循环标签
 	for _, task := range tasks {
-		current += service.UpdateTask(task, estimate-current, zentao.ActionRecorde)
-		ids = append(ids, task)
-		if current >= 8 {
-			break
+		if estimate-current > 0 {
+			count := service.UpdateTask(task, estimate-current, zentao.ActionRecorde)
+			current += count
+			if count > 0 {
+				ids = append(ids, task)
+			}
+			if current >= 8 {
+				break OuterLoop //跳出循环
+			}
 		}
 	}
 	current, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", current), 64)
@@ -172,11 +180,11 @@ func (service *Service) ConsumeRecord(estimate float64) (float64, []int) {
 }
 
 func (service *Service) UserLogin() {
-	action,_ := service.Action.FindLastLogin(service.User.Account)
+	action, _ := service.Action.FindLastLogin(service.User.Account)
 	// 当前时间往前推三个小时
-	add,_ := time.ParseDuration("-3h")
+	add, _ := time.ParseDuration("-3h")
 	last := time.Now().Add(add)
-	if last.Sub(action.Date).Seconds() >0 { //记录时间在三小时前
+	if last.Sub(action.Date).Seconds() > 0 { //记录时间在三小时前
 		//创建操作记录
 		service.Action.Create(service.User.ID, "user", ","+strconv.Itoa(0)+",", 0, 0, service.User.Account, zentao.ActionLogin, "")
 	}
