@@ -11,7 +11,7 @@ db.password =
 db.database =
 ```
 #### 包管理
-新的项目，复制完代码以后，全局替换go-zentao-task为你的项目名称，删除go.mod和go.sum文件，执行下列命令：
+删除go.mod和go.sum文件，执行下列命令：
 ```
 go mod init go-zentao-task
 go mod vendor //将下载到GOPATH的包复制到当前项目的vendor目录下
