@@ -27,15 +27,23 @@ func NewNotification() *Notification {
 }
 
 // SendNotification 发送机器人报警
-func (notification *Notification) SendNotification(name string, estimate string, count string, ids []int) []byte {
+func (notification *Notification) SendNotification(name string, estimate string, count string, ids []int, mapping map[string]float64) []byte {
 	url := util.GetRobotUrl()
 	idSt, err := json.Marshal(ids)
 	// 构造POST请求
+	marksData := Marks{}
+	marksData.Content = "禅道<font color=\"warning\">工时</font>，请相关同事注意。\n>"
+	if estimate =="" && len(mapping)>0 {
+		for k,v :=range mapping {
+			marksData.Content += "昵称<font color=\"comment\">" + k + "</font>已填用时:<font color=\"comment\">" + fmt.Sprintf("%.2f", v) + "</font>\n>"
+		}
+	} else {
+		marksData.Content += "昵称<font color=\"comment\">" + name + "</font>\n>手动填写用时:<font color=\"comment\">" + estimate + "</font>\n>自动填写用时:<font color=\"comment\">" + count + "</font>\n>任务id:<font color=\"comment\">" + string(idSt) + "</font>"
+	}
+
 	postBody := &PostBody{
 		Msgtype: "markdown",
-		Markdown: Marks{
-			Content: "禅道<font color=\"warning\">工时</font>，请相关同事注意。\n>昵称<font color=\"comment\">" + name + "</font>\n>手动填写用时:<font color=\"comment\">" + estimate + "</font>\n>自动填写用时:<font color=\"comment\">" + count + "</font>\n>任务id:<font color=\"comment\">" + string(idSt) + "</font>",
-		},
+		Markdown: marksData,
 	}
 	// struct 转json
 	body, _ := json.Marshal(postBody)

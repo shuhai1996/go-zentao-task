@@ -64,18 +64,20 @@ func consume() {
 	es, _ := service.GetEstimateToday()         // 已用工时
 	count, ids := service.ConsumeRecord(8 - es) //记录工时
 	fmt.Println(count, ids)
-	notify.SendNotification(service.User.Account, fmt.Sprintf("%.2f", es), fmt.Sprintf("%.2f", count), ids) // 发送报警，工时转成字符串
+	notify.SendNotification(service.User.Account, fmt.Sprintf("%.2f", es), fmt.Sprintf("%.2f", count), ids, nil) // 发送报警，工时转成字符串
 
 }
 
 func notice(users map[string]string) {
 	//只输出工时信息
+	consumers := make(map[string]float64)
 	for _, u := range users {
 		service.User.Account = u
 		es, _ := service.GetEstimateToday() // 已用工时
 		fmt.Println(es)
-		notify.SendNotification(service.User.Account, fmt.Sprintf("%.2f", es), "", nil) // 发送报警，工时转成字符串
+		consumers[u] = es
 	}
+	notify.SendNotification(service.User.Account, "", "", nil, consumers) // 发送报警
 
 }
 func RunServer(env string, quit chan os.Signal) { //服务运行
