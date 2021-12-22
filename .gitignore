@@ -9,3 +9,4 @@ go-zentao-task
 *.sql
 *_test.go
 main
+/go.mod
