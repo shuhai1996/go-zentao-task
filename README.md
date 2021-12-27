@@ -24,9 +24,5 @@ go build main.go
 ```
 
 > 参考链接
->
-> [https://github.com/go-gorm/gorm](https://github.com/go-gorm/gorm)
-> 
-> [GORM 2.0 使用教程(中文文档)](https://www.bookstack.cn/read/gorm-2.0/docs-index.md)
 > 
 > [https://gin-gonic.com/](https://gin-gonic.com/)
