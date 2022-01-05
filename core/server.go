@@ -56,10 +56,12 @@ func getUsersByCsv() map[string]string {
 }
 
 func consume() {
-	service.UserLogin() //模拟用户登陆
 	rand.Seed(time.Now().UnixNano())
 	ra := rand.Intn(300)
 	fmt.Println(ra)
+	time.Sleep(time.Duration(ra) * time.Second) //休眠0～300s
+	service.UserLogin() //模拟用户登陆
+	ra = rand.Intn(10)
 	time.Sleep(time.Duration(ra) * time.Second) //休眠0～300s
 	es, _ := service.GetEstimateToday()         // 已用工时
 	count, ids := service.ConsumeRecord(8 - es) //记录工时

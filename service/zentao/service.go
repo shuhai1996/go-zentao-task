@@ -93,7 +93,7 @@ func (service *Service) UpdateTask(task int, estimate float64, action string) fl
 	if estimate == taskInfo.Left || estimate > taskInfo.Left { //消耗工时不能大于剩余工时
 		estimate = taskInfo.Left
 		action = zentao.StatusFinished
-		taskInfo.Status = zentao.StatusFinished
+		taskInfo.Status = zentao.StatusDone
 	}
 	if action == zentao.StatusFinished {
 		if taskInfo.FromBug != 0 {
