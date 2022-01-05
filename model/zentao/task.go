@@ -39,6 +39,7 @@ const TypeDiscuss = "discuss"     //讨论，如"开会"等
 const StatusDo = "doing"          // 开发中
 const StatusWait = "wait"         //等待中
 const StatusFinished = "finished" // 完成
+const StatusDone = "done" // 	已完成
 
 func (*Task) FindOne(id int) (*Task, error) {
 	var result Task
